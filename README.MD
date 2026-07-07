@@ -103,3 +103,11 @@ python main.py
 - Все основные настройки сохраняются локально в `data/app.db`.
 
 ---
+---
+
+## Поддержка
+
+Если у вас возникли проблемы с установкой или запуском, пишите в Telegram:
+
+[![Telegram PM](https://img.shields.io/badge/Telegram-Написать%20мне-blue?logo=telegram&logoColor=white)](https://t.me/Ab3ST)
+[![Telegram Channel](https://img.shields.io/badge/Telegram-Канал%20проекта-222222?logo=telegram&logoColor=white)](https://t.me/Ab3stPublic)
