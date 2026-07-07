@@ -3,6 +3,11 @@
 <p align="center">Десктопное приложение на <code>PyQt6</code> для работы с Discord-аккаунтами, токенами, прокси и массовой отправкой сообщений.</p>
 
 <p align="center">
+  <a href="https://t.me/Ab3ST"><b>Написать мне</b></a> | 
+  <a href="https://t.me/Ab3stPublic"><b>Telegram Канал</b></a>
+</p>
+
+<p align="center">
   <img src="assets/6367166.webp" alt="Anonymous&Discord" width="220" />
 </p>
 
