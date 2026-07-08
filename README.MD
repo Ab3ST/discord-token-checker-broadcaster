@@ -20,7 +20,7 @@
 
 ---
 
-## Features
+## Возможности
 
 | Module | Description |
 | --- | --- |
@@ -32,7 +32,7 @@
 
 ---
 
-## Screenshots
+## Скриншоты
 
 <table>
   <tr>
