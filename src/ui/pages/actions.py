@@ -1,4 +1,4 @@
-﻿from PyQt6.QtWidgets import (
+from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QLabel, QHBoxLayout, QPushButton, QTextEdit,
     QProgressBar, QStackedWidget, QMenu
 )
@@ -282,6 +282,9 @@ class ActionsPage(QWidget):
         message, attachments = self._message, self._attachments
         max_workers = int(self.db.get("broadcast_threads", 100))
         delay = float(self.db.get("broadcast_delay", 0.0))
+        target_guild_id = None
+        if self.db.get("broadcast_target_guild_enabled", False):
+            target_guild_id = self.db.get("broadcast_target_guild_id", "") or ""
 
         self.is_broadcasting = True
         self.btn_select_accounts.setEnabled(False)
@@ -297,7 +300,8 @@ class ActionsPage(QWidget):
 
         self.broadcast = BroadcastWorker(
             self.selected_accounts, self.selected_proxies,
-            message, attachments, max_workers, delay, parent=self
+            message, attachments, max_workers, delay,
+            target_guild_id=target_guild_id, parent=self
         )
         self.broadcast.progress_signal.connect(self._on_broadcast_progress)
         self.broadcast.log_signal.connect(self._on_broadcast_log)

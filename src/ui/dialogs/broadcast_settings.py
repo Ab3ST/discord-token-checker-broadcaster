@@ -1,9 +1,12 @@
-from PyQt6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QWidget, QDoubleSpinBox
+from PyQt6.QtWidgets import (
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QWidget,
+    QDoubleSpinBox, QLineEdit,
+)
 from PyQt6.QtCore import Qt, QByteArray
 from PyQt6.QtGui import QFont, QPixmap, QPainter, QIcon
 from PyQt6.QtSvg import QSvgRenderer
 from pathlib import Path
-from src.ui.dialogs.settings import SettingRowWithSpinBox
+from src.ui.dialogs.settings import SettingRowWithSpinBox, SettingRowWithToggle
 from src.core.database import Database
 
 
@@ -67,7 +70,7 @@ class BroadcastSettingsDialog(QDialog):
         self.db = Database()
         self.setWindowTitle("")
         self.setModal(True)
-        self.setFixedSize(600, 350)
+        self.setFixedSize(600, 460)
         self.setWindowFlag(Qt.WindowType.WindowContextHelpButtonHint, False)
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -81,7 +84,7 @@ class BroadcastSettingsDialog(QDialog):
         layout.setSpacing(0)
 
         container = QLabel()
-        container.setFixedSize(580, 330)
+        container.setFixedSize(580, 440)
         container.setStyleSheet("""
             QLabel {
                 background-color: rgba(20, 20, 23, 252);
@@ -159,11 +162,68 @@ class BroadcastSettingsDialog(QDialog):
         self.delay_row.spinbox.valueChanged.connect(lambda v: self.db.set("broadcast_delay", v))
         body_layout.addWidget(self.delay_row)
 
+        sep2 = QLabel()
+        sep2.setFixedHeight(1)
+        sep2.setStyleSheet("background-color: rgba(255, 255, 255, 0.08); border: none;")
+        body_layout.addWidget(sep2)
+
+        self.target_guild_row = SettingRowWithToggle(
+            "Рассылка на определенный сервер", ""
+        )
+        self.target_guild_row.toggle.toggled.connect(self._on_target_guild_toggled)
+        body_layout.addWidget(self.target_guild_row)
+
+        self.guild_id_container = QWidget()
+        self.guild_id_container.setStyleSheet("background: transparent; border: none;")
+        guild_id_layout = QHBoxLayout(self.guild_id_container)
+        guild_id_layout.setContentsMargins(0, 0, 0, 12)
+        guild_id_layout.setSpacing(0)
+
+        self.guild_id_input = QLineEdit()
+        self.guild_id_input.setPlaceholderText("ID сервера")
+        self.guild_id_input.setFont(QFont("Segoe UI", 10))
+        self.guild_id_input.setStyleSheet("""
+            QLineEdit {
+                background-color: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.12);
+                border-radius: 8px;
+                color: rgba(255, 255, 255, 0.9);
+                padding: 8px 12px;
+                font-size: 10pt;
+                font-family: "Segoe UI";
+            }
+            QLineEdit:hover {
+                background-color: rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(255, 255, 255, 0.18);
+            }
+            QLineEdit:focus {
+                background-color: rgba(255, 255, 255, 0.12);
+                border: 1px solid rgba(88, 101, 242, 0.8);
+            }
+        """)
+        self.guild_id_input.textChanged.connect(self._on_guild_id_changed)
+        guild_id_layout.addWidget(self.guild_id_input)
+        body_layout.addWidget(self.guild_id_container)
+        self.guild_id_container.setVisible(False)
+
         body_layout.addStretch()
         content_layout.addWidget(body)
+
+    def _on_target_guild_toggled(self, checked: bool):
+        self.db.set("broadcast_target_guild_enabled", checked)
+        self.guild_id_container.setVisible(checked)
+
+    def _on_guild_id_changed(self, text: str):
+        self.db.set("broadcast_target_guild_id", text.strip())
 
     def _load_settings(self):
         threads = int(self.db.get("broadcast_threads", 100))
         delay = float(self.db.get("broadcast_delay", 0.0))
+        target_enabled = self.db.get("broadcast_target_guild_enabled", False)
+        target_guild_id = self.db.get("broadcast_target_guild_id", "") or ""
+
         self.threads_row.spinbox.setValue(threads)
         self.delay_row.spinbox.setValue(delay)
+        self.target_guild_row.toggle.set_checked(target_enabled)
+        self.guild_id_input.setText(target_guild_id)
+        self.guild_id_container.setVisible(target_enabled)

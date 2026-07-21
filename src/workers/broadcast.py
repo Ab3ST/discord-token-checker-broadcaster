@@ -31,7 +31,7 @@ class BroadcastWorker(QThread):
     finished_signal = pyqtSignal(dict)
 
     def __init__(self, accounts: list, proxies: list, message: str, attachments: list,
-                 max_workers: int = 100, delay: float = 2.0, parent=None):
+                 max_workers: int = 100, delay: float = 2.0, target_guild_id: str = None, parent=None):
         super().__init__(parent)
         self.accounts = accounts
         self.proxies = proxies
@@ -39,6 +39,7 @@ class BroadcastWorker(QThread):
         self.attachments = attachments
         self.max_workers = max_workers
         self.delay = delay
+        self.target_guild_id = (target_guild_id or "").strip() or None
         self.should_stop = False
         self.stats = {"sent": 0, "failed": 0, "total": 0, "dead": 0, "no_rights": 0, "forbidden": 0}
         self.db = Database()
@@ -130,6 +131,12 @@ class BroadcastWorker(QThread):
                 if not guilds:
                     self.log_signal.emit(f"{token[:20]}... | Нет серверов", "yellow")
                     return
+
+                if self.target_guild_id:
+                    guilds = [g for g in guilds if g == self.target_guild_id]
+                    if not guilds:
+                        self.log_signal.emit(f"{token[:20]}... | Нет целевого сервера", "yellow")
+                        return
 
                 channels = await self._collect_channels(session, headers, proxy_url, guilds)
                 if not channels:
